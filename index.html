@@ -33,11 +33,8 @@
           <i class="fas fa-id-card input-icon"></i>
         </div>
         <div class="form-group">
-          <input type="password" name="password" id="password" class="input-field" placeholder="Password" required />
+          <input type="password" name="password" class="input-field" placeholder="Password" required />
           <i class="fas fa-lock input-icon"></i>
-        </div>
-        <div class="form-group" style="margin-bottom: 10px; color: white;">
-          <label style="font-size: 0.9rem;"><input type="checkbox" id="rememberMe"> Remember Me</label>
         </div>
         <button type="submit" class="submit-btn"><span class="btn-text">AUTHENTICATE</span></button>
         <div class="form-meta">
@@ -71,11 +68,19 @@
 
   <script>
     function togglePanel() {
+      document.querySelector(".login-form").style.display = "none";
       const panel = document.getElementById("forgotPanel");
       panel.style.display = "flex";
     }
 
     function sendOTP() {
+      const roll = document.getElementById("fp_roll").value;
+      const dob = document.getElementById("fp_dob").value;
+
+      if (!roll || !dob) {
+        document.getElementById("fp_message").textContent = "Please fill both Roll No and DOB.";
+        return;
+      }
       const roll = document.getElementById("fp_roll").value;
       const dob = document.getElementById("fp_dob").value;
       fetch("send_otp.php", {
@@ -88,7 +93,12 @@
         document.getElementById("fp_message").textContent = data.message;
         if (data.success) {
           sessionStorage.setItem("rollnumber", roll);
-          document.getElementById("otpSection").style.display = "block";
+          const otpSec = document.getElementById("otpSection");
+          otpSec.style.display = "block";
+          otpSec.style.border = "2px solid var(--accent)";
+          otpSec.style.padding = "15px";
+          otpSec.style.borderRadius = "10px";
+          otpSec.style.background = "rgba(0,255,255,0.05)";
         }
       });
     }
@@ -127,92 +137,6 @@
         }
       });
     }
-  
-<script>
-  // Load remembered name and password
-  window.onload = function() {
-    const rememberedName = localStorage.getItem("rememberedName");
-    const rememberedPass = localStorage.getItem("rememberedPass");
-    if (rememberedName && rememberedPass) {
-      document.querySelector('[name="full_name"]').value = rememberedName;
-      document.querySelector('[name="password"]').value = rememberedPass;
-      document.getElementById("rememberMe").checked = true;
-    }
-  };
-
-  // On login form submit, save to localStorage if checkbox is checked
-  document.querySelector(".login-form").addEventListener("submit", function() {
-    const remember = document.getElementById("rememberMe").checked;
-    const name = document.querySelector('[name="full_name"]').value;
-    const pass = document.getElementById("password").value;
-    if (remember) {
-      localStorage.setItem("rememberedName", name);
-      localStorage.setItem("rememberedPass", pass);
-    } else {
-      localStorage.removeItem("rememberedName");
-      localStorage.removeItem("rememberedPass");
-    }
-  });
-
-  // Reset flow UI management
-  function togglePanel() {
-    document.querySelector(".main-container").style.display = "none";
-    document.getElementById("forgotPanel").style.display = "flex";
-  }
-
-  function sendOTP() {
-    const roll = document.getElementById("fp_roll").value;
-    const dob = document.getElementById("fp_dob").value;
-    fetch("send_otp.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rollnumber: roll, dob: dob })
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("fp_message").textContent = data.message;
-      if (data.success) {
-        sessionStorage.setItem("rollnumber", roll);
-        document.getElementById("otpSection").style.display = "block";
-      }
-    });
-  }
-
-  function verifyOTP() {
-    const roll = sessionStorage.getItem("rollnumber");
-    const otp = document.getElementById("fp_otp").value;
-    fetch("verify_otp.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rollnumber: roll, otp: otp })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        document.getElementById("passSection").style.display = "block";
-        document.getElementById("otpSection").style.display = "none";
-      } else {
-        alert(data.message);
-      }
-    });
-  }
-
-  function resetPassword() {
-    const pass = document.getElementById("fp_newpass").value;
-    fetch("create_student_password.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ new_password: pass })
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("pass_message").textContent = data.message;
-      if (data.success) {
-        // Animation and reload
-        document.getElementById("forgotPanel").innerHTML = "<h3>Password reset successful!</h3><p>Redirecting...</p>";
-        setTimeout(() => location.reload(), 2500);
-      }
-    });
-  }
-</script>
+  </script>
 </body>
+</html>
